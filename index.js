@@ -1,8 +1,8 @@
-const express = require("express");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
+import fetch from "node-fetch";
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
@@ -14,7 +14,7 @@ app.post("/generate-script", async (req, res) => {
   try {
     const { title, description } = req.body;
 
-    const prompt = `Create Facebook ad:
+    const prompt = `Create high converting Facebook ad:
 Product: ${title}
 Description: ${description}
 Make it attractive and policy safe`;
@@ -27,25 +27,31 @@ Make it attractive and policy safe`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: [
+            {
+              parts: [{ text: prompt }],
+            },
+          ],
         }),
       }
     );
 
     const data = await response.json();
+    console.log("Gemini Response:", data);
+
+    if (data.error) {
+      return res.json({ script: "❌ Gemini error aa raha hai" });
+    }
 
     const text =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Script generate nahi hua";
+      "❌ Script generate nahi hua";
 
     res.json({ script: text });
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Server error" });
+  } catch (err) {
+    console.log(err);
+    res.json({ script: "❌ Server error" });
   }
 });
 
-app.listen(10000, () => {
-  console.log("Server running 🚀");
-});
+app.listen(10000, () => console.log("Server running 🚀"));
