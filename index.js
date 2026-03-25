@@ -20,7 +20,7 @@ Description: ${description}
 
 Make it catchy, emotional and persuasive.`;
 
-    const API_KEY = "AIzaSyC7qz0KiJywJqvfIMIgHJ2KxhK6yJ2U_aA";
+    const API_KEY = "AIzaSyDz5V1aYhvcx3CTWvoUa2DtTlYqIF-XgFY";
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${API_KEY}`,
