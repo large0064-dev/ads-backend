@@ -1,5 +1,5 @@
 const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyC7woHlVvSWiX7Ooo5tdjQMiD7iHBMn43g`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCnRMfHDEWhsaXX7XgvDj_bl_2gep-PqVY,
   {
     method: "POST",
     headers: {
