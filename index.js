@@ -13,13 +13,14 @@ app.post("/generate-script", async (req, res) => {
   try {
     const { title, description } = req.body;
 
+    // ✅ PROMPT DEFINE KARO (IMPORTANT)
     const prompt = `Create high converting Facebook ad:
 Product: ${title}
 Description: ${description}
 Make it attractive and policy safe`;
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCnRMfHDEWhsaXX7XgvDj_bl_2gep-PqVY",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCnRMfHDEWhsaXX7XgvDj_bl_2gep-PqVY",
       {
         method: "POST",
         headers: {
@@ -47,6 +48,7 @@ Make it attractive and policy safe`;
       "❌ Script generate nahi hua";
 
     res.json({ script: text });
+
   } catch (err) {
     console.log("Server Error:", err);
     res.json({ script: "❌ Server error" });
