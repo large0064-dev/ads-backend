@@ -9,8 +9,6 @@ app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-
-// 👇 YAHAN SE START (IMPORTANT PART)
 app.post("/generate-script", async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -20,10 +18,10 @@ Product: ${title}
 Description: ${description}
 Make it attractive and policy safe`;
 
-    const API_KEY = "AIzaSyCjBnDV7SZpFgrwhBGMISPadSl0AORHxbI";
+    const API_KEY = "AIzaSyC7qz0KiJywJqvfIMIgHJ2KxhK6yJ2U_aA";
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-latest:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: {
@@ -32,7 +30,6 @@ Make it attractive and policy safe`;
         body: JSON.stringify({
           contents: [
             {
-              role: "user",
               parts: [{ text: prompt }],
             },
           ],
@@ -58,8 +55,6 @@ Make it attractive and policy safe`;
     res.json({ script: "❌ Server error" });
   }
 });
-// 👆 YAHAN TAK
-
 
 const PORT = process.env.PORT || 10000;
 
