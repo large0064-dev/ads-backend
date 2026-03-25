@@ -19,7 +19,7 @@ Description: ${description}
 Make it attractive and policy safe`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCnRMfHDEWhsaXX7XgvDj_bl_2gep-PqVY,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCnRMfHDEWhsaXX7XgvDj_bl_2gep-PqVY",
       {
         method: "POST",
         headers: {
@@ -39,7 +39,7 @@ Make it attractive and policy safe`;
     console.log("Gemini Response:", data);
 
     if (data.error) {
-      return res.json({ script: "❌ Gemini error" });
+      return res.json({ script: "❌ Gemini error aa raha hai" });
     }
 
     const text =
