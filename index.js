@@ -13,15 +13,17 @@ app.post("/generate-script", async (req, res) => {
   try {
     const { title, description } = req.body;
 
-    const prompt = `Create high converting Facebook ad:
+    const prompt = `Create a high converting Facebook ad:
+
 Product: ${title}
 Description: ${description}
-Make it attractive and policy safe`;
+
+Make it catchy, emotional and persuasive.`;
 
     const API_KEY = "AIzaSyC7qz0KiJywJqvfIMIgHJ2KxhK6yJ2U_aA";
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: {
