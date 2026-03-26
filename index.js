@@ -1,55 +1,31 @@
-import express from "express";
-import cors from "cors";
-import fetch from "node-fetch"; // 👈 IMPORTANT
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("Backend running 🚀");
-});
-
-const HF_TOKEN = process.env.HF_TOKEN;
-
-app.post("/generate-script", async (req, res) => {
-  try {
-    const { title, description } = req.body;
-
-    const prompt = `Write a high converting Facebook ad:
-Product: ${title}
-Description: ${description}`;
-
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/gpt2",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${HF_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-        }),
-      }
-    );
-
-    const data = await response.json();
-    console.log("HF Response:", data);
-
-    const text =
-      data?.[0]?.generated_text || "❌ Script generate nahi hua";
-
-    res.json({ script: text });
-
-  } catch (err) {
-    console.log("Server Error:", err);
-    res.json({ script: "❌ Server error" });
+const response = await fetch(
+  "https://router.huggingface.co/hf-inference/models/gpt2",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${HF_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      inputs: prompt,
+      parameters: {
+        max_new_tokens: 120,
+        temperature: 0.7,
+      },
+    }),
   }
-});
+);
 
-const PORT = process.env.PORT || 10000;
+const data = await response.json();
+console.log("HF Response:", data);
 
-app.listen(PORT, () => {
-  console.log("Server running 🚀 on port " + PORT);
-});
+// 👇 Safe extraction
+let text = "❌ Script generate nahi hua";
+
+if (Array.isArray(data) && data[0]?.generated_text) {
+  text = data[0].generated_text;
+} else if (data?.error) {
+  console.log("HF Error:", data.error);
+}
+
+res.json({ script: text });
