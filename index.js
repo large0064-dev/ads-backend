@@ -10,9 +10,6 @@ app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-/* =========================
-   🤖 GENERATE SCRIPT API
-========================= */
 app.post("/generate-script", async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -24,12 +21,8 @@ Make it catchy, short and persuasive.`;
 
     const HF_TOKEN = process.env.HF_TOKEN;
 
-    if (!HF_TOKEN) {
-      return res.json({ script: "❌ HF_TOKEN missing in Render" });
-    }
-
     const response = await fetch(
-      "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
+      "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
       {
         method: "POST",
         headers: {
@@ -42,13 +35,23 @@ Make it catchy, short and persuasive.`;
       }
     );
 
-    const data = await response.json();
-    console.log("HF Response:", data);
+    const textData = await response.text(); // 👈 IMPORTANT FIX
+
+    let result;
+
+    try {
+      result = JSON.parse(textData);
+    } catch {
+      console.log("Raw Response:", textData);
+      return res.json({ script: "❌ API response error" });
+    }
+
+    console.log("HF Response:", result);
 
     let text = "❌ Script generate nahi hua";
 
-    if (Array.isArray(data) && data[0]?.generated_text) {
-      text = data[0].generated_text;
+    if (result?.[0]?.generated_text) {
+      text = result[0].generated_text;
     }
 
     res.json({ script: text });
@@ -59,9 +62,6 @@ Make it catchy, short and persuasive.`;
   }
 });
 
-/* =========================
-   🚀 SERVER START
-========================= */
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
