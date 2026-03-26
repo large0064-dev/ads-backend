@@ -1,8 +1,9 @@
 {
   "name": "ads-backend",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Ads script generator",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
