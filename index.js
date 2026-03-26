@@ -22,7 +22,7 @@ Make it catchy, short and persuasive.`;
     const HF_TOKEN = process.env.HF_TOKEN;
 
     const response = await fetch(
-      "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
+      "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
       {
         method: "POST",
         headers: {
@@ -35,26 +35,24 @@ Make it catchy, short and persuasive.`;
       }
     );
 
-    const textData = await response.text(); // 👈 IMPORTANT FIX
+    // 🔥 IMPORTANT FIX
+    const textResponse = await response.text();
+    console.log("RAW RESPONSE:", textResponse);
 
-    let result;
-
+    let data;
     try {
-      result = JSON.parse(textData);
+      data = JSON.parse(textResponse);
     } catch {
-      console.log("Raw Response:", textData);
       return res.json({ script: "❌ API response error" });
     }
 
-    console.log("HF Response:", result);
+    let result = "❌ Script generate nahi hua";
 
-    let text = "❌ Script generate nahi hua";
-
-    if (result?.[0]?.generated_text) {
-      text = result[0].generated_text;
+    if (Array.isArray(data) && data[0]?.generated_text) {
+      result = data[0].generated_text;
     }
 
-    res.json({ script: text });
+    res.json({ script: result });
 
   } catch (err) {
     console.log("Server Error:", err);
