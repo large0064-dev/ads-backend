@@ -1,31 +1,34 @@
-const response = await fetch(
-  "https://router.huggingface.co/hf-inference/models/gpt2",
-  {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${HF_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      inputs: prompt,
-      parameters: {
-        max_new_tokens: 120,
-        temperature: 0.7,
-      },
-    }),
+import express from "express";
+import cors from "cors";
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("Backend running 🚀");
+});
+
+app.post("/generate-script", async (req, res) => {
+  try {
+    const { title, description } = req.body;
+
+    // 🔥 TEMP RESPONSE (test ke liye)
+    const fakeScript = `🔥 Ad Script:
+Buy ${title} now!
+${description}
+Limited Offer 🚀`;
+
+    res.json({ script: fakeScript });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ script: "❌ Server error" });
   }
-);
+});
 
-const data = await response.json();
-console.log("HF Response:", data);
+const PORT = process.env.PORT || 10000;
 
-// 👇 Safe extraction
-let text = "❌ Script generate nahi hua";
-
-if (Array.isArray(data) && data[0]?.generated_text) {
-  text = data[0].generated_text;
-} else if (data?.error) {
-  console.log("HF Error:", data.error);
-}
-
-res.json({ script: text });
+app.listen(PORT, () => {
+  console.log("Server running 🚀 on port " + PORT);
+});
