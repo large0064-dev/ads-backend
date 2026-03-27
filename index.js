@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
+import { exec } from "child_process";
+import fs from "fs";
 
 const app = express();
 app.use(cors());
@@ -10,18 +12,23 @@ app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-app.post("/generate-script", async (req, res) => {
+// 🔥 MAIN API
+app.post("/generate-ad", async (req, res) => {
   try {
-    const { title, description } = req.body;
-
-    const prompt = `Write a high converting Facebook ad:
-Product: ${title}
-Description: ${description}
-Make it catchy, short and persuasive.`;
+    const { title, description, image } = req.body;
 
     const HF_TOKEN = process.env.HF_TOKEN;
 
-    const response = await fetch(
+    if (!HF_TOKEN) {
+      return res.json({ error: "HF_TOKEN missing" });
+    }
+
+    // 🧠 STEP 1: SCRIPT
+    const prompt = `Write a short Facebook ad:
+Product: ${title}
+Description: ${description}`;
+
+    const aiRes = await fetch(
       "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
       {
         method: "POST",
@@ -29,34 +36,43 @@ Make it catchy, short and persuasive.`;
           Authorization: `Bearer ${HF_TOKEN}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          inputs: prompt,
-        }),
+        body: JSON.stringify({ inputs: prompt }),
       }
     );
 
-    // 🔥 IMPORTANT FIX
-    const textResponse = await response.text();
-    console.log("RAW RESPONSE:", textResponse);
+    const aiText = await aiRes.text();
 
-    let data;
+    let script = "Best product for you!";
     try {
-      data = JSON.parse(textResponse);
-    } catch {
-      return res.json({ script: "❌ API response error" });
-    }
+      const data = JSON.parse(aiText);
+      if (Array.isArray(data) && data[0]?.generated_text) {
+        script = data[0].generated_text;
+      }
+    } catch {}
 
-    let result = "❌ Script generate nahi hua";
+    // 🖼 STEP 2: IMAGE DOWNLOAD
+    const imgRes = await fetch(image);
+    const buffer = await imgRes.arrayBuffer();
+    fs.writeFileSync("input.jpg", Buffer.from(buffer));
 
-    if (Array.isArray(data) && data[0]?.generated_text) {
-      result = data[0].generated_text;
-    }
+    // 🎬 STEP 3: VIDEO
+    const output = "output.mp4";
 
-    res.json({ script: result });
+    const cmd = `ffmpeg -y -loop 1 -i input.jpg -vf "drawtext=text='${script}':fontcolor=white:fontsize=24:x=10:y=H-th-10" -t 5 -pix_fmt yuv420p ${output}`;
+
+    await new Promise((resolve, reject) => {
+      exec(cmd, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+
+    // 📤 STEP 4: SEND VIDEO
+    res.sendFile(`${process.cwd()}/${output}`);
 
   } catch (err) {
-    console.log("Server Error:", err);
-    res.json({ script: "❌ Server error" });
+    console.log("ERROR:", err);
+    res.json({ error: "Server error" });
   }
 });
 
