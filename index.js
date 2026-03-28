@@ -55,10 +55,12 @@ Description: ${description}`;
     const buffer = await imgRes.arrayBuffer();
     fs.writeFileSync("input.jpg", Buffer.from(buffer));
 
-    // 🎬 STEP 3: VIDEO
+    // 🎬 STEP 3: VIDEO (🔥 FIXED)
     const output = "output.mp4";
 
-    const cmd = `ffmpeg -y -loop 1 -i input.jpg -vf "drawtext=text='${script}':fontcolor=white:fontsize=24:x=10:y=H-th-10" -t 5 -pix_fmt yuv420p ${output}`;
+    const safeText = script.replace(/'/g, ""); // error avoid
+
+    const cmd = `ffmpeg -y -loop 1 -i input.jpg -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,drawtext=text='${safeText}':fontcolor=white:fontsize=24:x=10:y=H-th-10" -t 5 -pix_fmt yuv420p ${output}`;
 
     await new Promise((resolve, reject) => {
       exec(cmd, (err) => {
