@@ -1,4 +1,4 @@
-// VERSION FINAL PRO ADS (MULTI VIDEO + TIMED TEXT)
+// VERSION PRO SCENE BASED ADS
 
 import express from "express";
 import cors from "cors";
@@ -14,19 +14,9 @@ app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-// 🔥 MAIN API
 app.post("/generate-ads", async (req, res) => {
   try {
-    const { title, description, image } = req.body;
-
-    console.log("Incoming:", { title, description, image });
-
-    // 🧠 SAME STRUCTURE (3 STYLE TEXT)
-    const scripts = [
-      "STOP SCROLLING!",
-      "Best Product For You",
-      "Limited Time Offer"
-    ];
+    const { image } = req.body;
 
     // 🖼 IMAGE FIX
     let imageUrl = image;
@@ -41,63 +31,71 @@ app.post("/generate-ads", async (req, res) => {
     const buffer = await imgRes.arrayBuffer();
     fs.writeFileSync("input.jpg", Buffer.from(buffer));
 
-    // 🎬 OUTPUT FILES
     const outputs = ["output1.mp4", "output2.mp4", "output3.mp4"];
 
-    // 🎬 FFMPEG COMMANDS (PRO STYLE)
-    const commands = scripts.map((text, i) => {
-      return `ffmpeg -y -loop 1 -i input.jpg -vf "
+    // 🎬 3 DIFFERENT STYLE VIDEOS
+    const commands = [
+
+      // 🎥 VIDEO 1 (FAST ZOOM STYLE)
+      `ffmpeg -y -loop 1 -i input.jpg -vf "
 scale=720:1280:force_original_aspect_ratio=increase,
 crop=720:1280,
 
-zoompan=z='min(zoom+0.002,1.6)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=125:s=720x1280,
+zoompan=z='min(zoom+0.004,1.6)':d=125:s=720x1280,
 
-drawbox=y=0:h=180:color=black@0.5:t=fill,
-drawbox=y=1100:h=180:color=black@0.5:t=fill,
+drawtext=text='🔥 STOP SCROLLING':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100:enable='lt(t,1.5)',
+drawtext=text='💡 Best Quality Product':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=(h/2):enable='between(t,1.5,3)',
+drawtext=text='🎁 Limited Offer → Order Now':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=h-150:enable='gte(t,3)'
+" -t 5 -pix_fmt yuv420p ${outputs[0]}`,
 
-drawtext=text='🔥 ${text}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=80:enable='lt(t,1.5)',
+      // 🎥 VIDEO 2 (LEFT TO RIGHT PAN)
+      `ffmpeg -y -loop 1 -i input.jpg -vf "
+scale=720:1280:force_original_aspect_ratio=increase,
+crop=720:1280,
 
-drawtext=text='💡 Best Quality Product':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=(h/2-50):enable='between(t,1.5,3)',
+zoompan=z='1.2':x='iw*t/5':y='ih/2':d=125:s=720x1280,
 
-drawtext=text='🎁 Limited Time Offer':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=(h/2+20):enable='between(t,3,4)',
+drawtext=text='🔥 Don’t Miss This':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=100:enable='lt(t,1.5)',
+drawtext=text='💡 Premium Quality':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=(h/2):enable='between(t,1.5,3)',
+drawtext=text='👉 Buy Now':fontcolor=yellow:fontsize=44:x=(w-text_w)/2:y=h-150:enable='gte(t,3)'
+" -t 5 -pix_fmt yuv420p ${outputs[1]}`,
 
-drawtext=text='👉 Order Now':fontcolor=white:fontsize=44:x=(w-text_w)/2:y=h-120:enable='gte(t,4)'
-" -t 5 -pix_fmt yuv420p ${outputs[i]}`;
-    });
+      // 🎥 VIDEO 3 (SLOW ZOOM OUT)
+      `ffmpeg -y -loop 1 -i input.jpg -vf "
+scale=720:1280:force_original_aspect_ratio=increase,
+crop=720:1280,
 
-    // 🚀 RUN ALL VIDEOS
+zoompan=z='if(lte(zoom,1.0),1.5,max(zoom-0.002,1.0))':d=125:s=720x1280,
+
+drawtext=text='🔥 Trending Product':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=100:enable='lt(t,1.5)',
+drawtext=text='💡 Loved by Users':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=(h/2):enable='between(t,1.5,3)',
+drawtext=text='🎁 Order Today':fontcolor=yellow:fontsize=44:x=(w-text_w)/2:y=h-150:enable='gte(t,3)'
+" -t 5 -pix_fmt yuv420p ${outputs[2]}`
+    ];
+
+    // 🚀 RUN ALL
     for (let cmd of commands) {
-      console.log("Running:", cmd);
-
       await new Promise((resolve, reject) => {
-        exec(cmd, (err, stdout, stderr) => {
-          if (err) {
-            console.log("❌ FFMPEG ERROR:", err);
-            console.log(stderr);
-            reject(err);
-          } else {
-            resolve();
-          }
+        exec(cmd, (err) => {
+          if (err) reject(err);
+          else resolve();
         });
       });
     }
 
     // 📤 RETURN LINKS
-    const videoLinks = outputs.map(
-      (file) => `${req.protocol}://${req.get("host")}/${file}`
-    );
-
-    console.log("✅ Videos ready:", videoLinks);
-
-    res.json({ videos: videoLinks });
+    res.json({
+      videos: outputs.map(
+        (file) => `${req.protocol}://${req.get("host")}/${file}`
+      ),
+    });
 
   } catch (err) {
-    console.log("🔥 ERROR:", err);
-    res.json({ error: err.message });
+    console.log("ERROR:", err);
+    res.json({ error: "Server error" });
   }
 });
 
-// 📂 STATIC FILE SERVE
 app.use(express.static(process.cwd()));
 
 const PORT = process.env.PORT || 10000;
