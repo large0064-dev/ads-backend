@@ -1,3 +1,5 @@
+// VERSION 2 FIX
+
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
@@ -58,7 +60,7 @@ Description: ${description}`;
     // 🎬 STEP 3: VIDEO (🔥 FIXED)
     const output = "output.mp4";
 
-    const safeText = script.replace(/'/g, ""); // error avoid
+    const safeText = script.replace(/'/g, "");
 
     const cmd = `ffmpeg -y -loop 1 -i input.jpg -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,drawtext=text='${safeText}':fontcolor=white:fontsize=24:x=10:y=H-th-10" -t 5 -pix_fmt yuv420p ${output}`;
 
