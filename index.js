@@ -1,4 +1,4 @@
-// VERSION 7 - PRO REEL ADS (3 VIDEOS FINAL)
+// VERSION FINAL - IMAGE FIX + PRO VIDEO + DEBUG
 
 import express from "express";
 import cors from "cors";
@@ -19,98 +19,69 @@ app.post("/generate-ads", async (req, res) => {
   try {
     const { title, description, image } = req.body;
 
-    const HF_TOKEN = process.env.HF_TOKEN;
+    console.log("Incoming:", { title, description, image });
 
-    if (!HF_TOKEN) {
-      return res.json({ error: "HF_TOKEN missing" });
-    }
-
-    // 🧠 STEP 1: 3 DIFFERENT SCRIPTS
-    const prompts = [
-      `Hindi catchy ad hook:
-Product: ${title}
-Description: ${description}`,
-
-      `Hindi benefits ad:
-Product: ${title}
-Description: ${description}`,
-
-      `Hindi offer ad:
-Product: ${title}
-Description: ${description}`
+    // 🧠 SIMPLE STATIC SCRIPTS (stable)
+    const scripts = [
+      "Best Product For You",
+      "Limited Time Offer",
+      "Buy Now & Save Big"
     ];
 
-    const scripts = [];
+    // 🖼 IMAGE FIX (IMPORTANT)
+    let imageUrl = image;
 
-    for (let i = 0; i < 3; i++) {
-      const aiRes = await fetch(
-        "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${HF_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ inputs: prompts[i] }),
-        }
-      );
+    if (!imageUrl) {
+      console.log("⚠️ Image missing → using default image");
 
-      const aiText = await aiRes.text();
-
-      let script = "Best product for you!";
-      try {
-        const data = JSON.parse(aiText);
-        if (Array.isArray(data) && data[0]?.generated_text) {
-          script = data[0].generated_text;
-        }
-      } catch {}
-
-      scripts.push(script.replace(/'/g, "").substring(0, 60));
+      imageUrl =
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff";
     }
 
-    // 🖼 STEP 2: DOWNLOAD IMAGE
-    const imgRes = await fetch(image);
+    const imgRes = await fetch(imageUrl);
     const buffer = await imgRes.arrayBuffer();
     fs.writeFileSync("input.jpg", Buffer.from(buffer));
 
-    // 🎬 STEP 3: CREATE 3 VIDEOS
+    // 🎬 VIDEO SETTINGS
     const outputs = ["output1.mp4", "output2.mp4", "output3.mp4"];
 
     const commands = scripts.map((text, i) => {
-      return `ffmpeg -y -loop 1 -i input.jpg -vf "
-scale=720:1280:force_original_aspect_ratio=increase,
-crop=720:1280,
-zoompan=z='min(zoom+0.002,1.6)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=125:s=720x1280,
-drawbox=y=0:h=200:color=black@0.5:t=fill,
-drawbox=y=1080:h=200:color=black@0.5:t=fill,
-drawtext=text='🔥 ${text}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=80,
-drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=h-120
-" -t 5 -pix_fmt yuv420p ${outputs[i]}`;
+      return `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280,zoompan=z='min(zoom+0.002,1.6)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=125:s=720x1280,drawbox=y=0:h=200:color=black@0.5:t=fill,drawbox=y=1080:h=200:color=black@0.5:t=fill,drawtext=text='🔥 ${text}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=80,drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=h-120" -t 5 -pix_fmt yuv420p ${outputs[i]}`;
     });
 
+    // 🔥 RUN FFMPEG
     for (let cmd of commands) {
+      console.log("Running:", cmd);
+
       await new Promise((resolve, reject) => {
-        exec(cmd, (err) => {
-          if (err) reject(err);
-          else resolve();
+        exec(cmd, (err, stdout, stderr) => {
+          if (err) {
+            console.log("❌ FFMPEG ERROR:", err);
+            console.log("STDERR:", stderr);
+            reject(err);
+          } else {
+            resolve();
+          }
         });
       });
     }
 
-    // 📤 RETURN LINKS
-    res.json({
-      videos: outputs.map(
-        (file) => `${req.protocol}://${req.get("host")}/${file}`
-      ),
-    });
+    // 📤 SEND VIDEO LINKS
+    const videoLinks = outputs.map(
+      (file) => `${req.protocol}://${req.get("host")}/${file}`
+    );
+
+    console.log("Videos ready:", videoLinks);
+
+    res.json({ videos: videoLinks });
 
   } catch (err) {
-    console.log("ERROR:", err);
-    res.json({ error: "Server error" });
+    console.log("🔥 FINAL ERROR:", err);
+    res.json({ error: err.message });
   }
 });
 
-// 🟢 STATIC FILE SERVE
+// 🟢 STATIC SERVE
 app.use(express.static(process.cwd()));
 
 const PORT = process.env.PORT || 10000;
