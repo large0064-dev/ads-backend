@@ -1,4 +1,4 @@
-// VERSION 3 PRO VIDEO
+// VERSION 4 FULL SCREEN PRO VIDEO
 
 import express from "express";
 import cors from "cors";
@@ -57,12 +57,12 @@ Description: ${description}`;
     const buffer = await imgRes.arrayBuffer();
     fs.writeFileSync("input.jpg", Buffer.from(buffer));
 
-    // 🎬 STEP 3: VIDEO (🔥 PRO VERSION)
+    // 🎬 STEP 3: VIDEO (🔥 FULL SCREEN PRO)
     const output = "output.mp4";
 
-    const safeText = script.replace(/'/g, "").substring(0, 80); // safe + limit text
+    const safeText = script.replace(/'/g, "").substring(0, 80);
 
-    const cmd = `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,zoompan=z='min(zoom+0.0015,1.5)':d=125,drawbox=color=black@0.4:t=fill,drawtext=text='${safeText}':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=(h-text_h)/2" -t 5 -pix_fmt yuv420p ${output}`;
+    const cmd = `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280,zoompan=z='min(zoom+0.0015,1.5)':d=125,drawbox=color=black@0.4:t=fill,drawtext=text='${safeText}':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=(h-text_h)/2" -t 5 -pix_fmt yuv420p ${output}`;
 
     await new Promise((resolve, reject) => {
       exec(cmd, (err) => {
