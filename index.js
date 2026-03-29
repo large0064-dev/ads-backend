@@ -1,25 +1,29 @@
-// VERSION FINAL - MULTI VIDEO + HTTPS FIX + REEL STYLE
+// VERSION FINAL - STATIC FIX + HTTPS + REEL VIDEOS
 
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
 import { exec } from "child_process";
 import fs from "fs";
+import path from "path";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ✅ STATIC FIX (VERY IMPORTANT)
+app.use(express.static(path.resolve()));
+
 app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
 
-// 🔥 MAIN API (3 VIDEOS)
+// 🔥 MAIN API
 app.post("/generate-ads", async (req, res) => {
   try {
     const { title, description, image } = req.body;
 
-    // 🛡️ IMAGE FIX (important)
+    // 🛡️ IMAGE FIX
     let imageUrl = image;
     if (!imageUrl) {
       console.log("⚠️ Image missing → using default image");
@@ -35,10 +39,10 @@ app.post("/generate-ads", async (req, res) => {
     // 🎬 OUTPUT FILES
     const outputs = ["output1.mp4", "output2.mp4", "output3.mp4"];
 
-    // 🎬 PROFESSIONAL REEL STYLE VIDEOS
+    // 🎬 VIDEO COMMANDS (REEL STYLE)
     const commands = [
 
-      // 🎥 VIDEO 1 (FAST ZOOM)
+      // 🎥 VIDEO 1
       `ffmpeg -y -loop 1 -i input.jpg -vf "
       scale=720:1280:force_original_aspect_ratio=increase,
       crop=720:1280,
@@ -48,7 +52,7 @@ app.post("/generate-ads", async (req, res) => {
       drawtext=text='🎁 Limited Offer':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=h-150:enable='gte(t,3)'
       " -t 5 -pix_fmt yuv420p ${outputs[0]}`,
 
-      // 🎥 VIDEO 2 (CLEAN STYLE)
+      // 🎥 VIDEO 2
       `ffmpeg -y -loop 1 -i input.jpg -vf "
       scale=720:1280:force_original_aspect_ratio=increase,
       crop=720:1280,
@@ -58,7 +62,7 @@ app.post("/generate-ads", async (req, res) => {
       drawtext=text='👉 Buy Now':fontcolor=yellow:fontsize=44:x=(w-text_w)/2:y=h-150:enable='gte(t,3)'
       " -t 5 -pix_fmt yuv420p ${outputs[1]}`,
 
-      // 🎥 VIDEO 3 (ZOOM OUT)
+      // 🎥 VIDEO 3
       `ffmpeg -y -loop 1 -i input.jpg -vf "
       scale=720:1280:force_original_aspect_ratio=increase,
       crop=720:1280,
@@ -69,7 +73,7 @@ app.post("/generate-ads", async (req, res) => {
       " -t 5 -pix_fmt yuv420p ${outputs[2]}`
     ];
 
-    // ▶️ RUN COMMANDS
+    // ▶️ RUN ALL COMMANDS
     for (let cmd of commands) {
       await new Promise((resolve, reject) => {
         exec(cmd, (err) => {
@@ -79,7 +83,7 @@ app.post("/generate-ads", async (req, res) => {
       });
     }
 
-    // 📤 RETURN HTTPS LINKS (🔥 FIXED)
+    // 📤 RETURN LINKS (HTTPS FIX)
     res.json({
       videos: outputs.map(
         (file) => `https://${req.get("host")}/${file}`
@@ -91,9 +95,6 @@ app.post("/generate-ads", async (req, res) => {
     res.json({ error: "Server error" });
   }
 });
-
-// 📁 STATIC FILES
-app.use(express.static(process.cwd()));
 
 const PORT = process.env.PORT || 10000;
 
