@@ -1,4 +1,4 @@
-// VERSION FINAL - STATIC FIX + HTTPS + REEL VIDEOS
+// VERSION FINAL - STABLE VIDEO GENERATION (NO ERRORS)
 
 import express from "express";
 import cors from "cors";
@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ STATIC FIX (VERY IMPORTANT)
+// ✅ STATIC FILE SERVE (FIXED)
 app.use(express.static(path.resolve()));
 
 app.get("/", (req, res) => {
@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 // 🔥 MAIN API
 app.post("/generate-ads", async (req, res) => {
   try {
-    const { title, description, image } = req.body;
+    const { image } = req.body;
 
     // 🛡️ IMAGE FIX
     let imageUrl = image;
@@ -39,46 +39,29 @@ app.post("/generate-ads", async (req, res) => {
     // 🎬 OUTPUT FILES
     const outputs = ["output1.mp4", "output2.mp4", "output3.mp4"];
 
-    // 🎬 VIDEO COMMANDS (REEL STYLE)
+    // 🎬 VIDEO COMMANDS (100% STABLE)
     const commands = [
 
-      // 🎥 VIDEO 1
-      `ffmpeg -y -loop 1 -i input.jpg -vf "
-      scale=720:1280:force_original_aspect_ratio=increase,
-      crop=720:1280,
-      zoompan=z='min(zoom+0.004,1.6)':d=125:s=720x1280,
-      drawtext=text='🔥 STOP SCROLLING':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100:enable='lt(t,1.5)',
-      drawtext=text='💡 Best Quality Product':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=(h/2):enable='between(t,1.5,3)',
-      drawtext=text='🎁 Limited Offer':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=h-150:enable='gte(t,3)'
-      " -t 5 -pix_fmt yuv420p ${outputs[0]}`,
+      // VIDEO 1
+      `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,drawtext=text='🔥 STOP SCROLLING':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100,drawtext=text='💡 Best Product':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=500,drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1100" -t 5 ${outputs[0]}`,
 
-      // 🎥 VIDEO 2
-      `ffmpeg -y -loop 1 -i input.jpg -vf "
-      scale=720:1280:force_original_aspect_ratio=increase,
-      crop=720:1280,
-      zoompan=z='1.1':d=125:s=720x1280,
-      drawtext=text='🔥 Don’t Miss This':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=100:enable='lt(t,1.5)',
-      drawtext=text='💡 Premium Quality':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=(h/2):enable='between(t,1.5,3)',
-      drawtext=text='👉 Buy Now':fontcolor=yellow:fontsize=44:x=(w-text_w)/2:y=h-150:enable='gte(t,3)'
-      " -t 5 -pix_fmt yuv420p ${outputs[1]}`,
+      // VIDEO 2
+      `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,drawtext=text='🔥 Limited Offer':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100,drawtext=text='💡 Premium Quality':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=500,drawtext=text='👉 Buy Now':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1100" -t 5 ${outputs[1]}`,
 
-      // 🎥 VIDEO 3
-      `ffmpeg -y -loop 1 -i input.jpg -vf "
-      scale=720:1280:force_original_aspect_ratio=increase,
-      crop=720:1280,
-      zoompan=z='if(lte(zoom,1.0),1.5,max(zoom-0.002,1.0))':d=125:s=720x1280,
-      drawtext=text='🔥 Trending Product':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=100:enable='lt(t,1.5)',
-      drawtext=text='💡 Loved by Users':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=(h/2):enable='between(t,1.5,3)',
-      drawtext=text='🎁 Order Today':fontcolor=yellow:fontsize=44:x=(w-text_w)/2:y=h-150:enable='gte(t,3)'
-      " -t 5 -pix_fmt yuv420p ${outputs[2]}`
+      // VIDEO 3
+      `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,drawtext=text='🔥 Trending Now':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100,drawtext=text='💡 Loved by Users':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=500,drawtext=text='🎁 Order Today':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1100" -t 5 ${outputs[2]}`
     ];
 
     // ▶️ RUN ALL COMMANDS
     for (let cmd of commands) {
       await new Promise((resolve, reject) => {
         exec(cmd, (err) => {
-          if (err) reject(err);
-          else resolve();
+          if (err) {
+            console.log("FFMPEG ERROR:", err);
+            reject(err);
+          } else {
+            resolve();
+          }
         });
       });
     }
