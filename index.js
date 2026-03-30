@@ -1,4 +1,4 @@
-// VERSION 7 - VIDEO 1 UPGRADED (REEL STYLE)
+// VERSION 8 - PRO VIDEO STYLE (GRADIENT + ZOOM)
 
 import express from "express";
 import cors from "cors";
@@ -23,7 +23,6 @@ app.post("/generate-ads", async (req, res) => {
   try {
     const { image } = req.body;
 
-    // 🛡️ IMAGE FIX
     let imageUrl = image;
     if (!imageUrl) {
       console.log("⚠️ Using default image");
@@ -36,35 +35,35 @@ app.post("/generate-ads", async (req, res) => {
     const buffer = await imgRes.arrayBuffer();
     fs.writeFileSync("input.jpg", Buffer.from(buffer));
 
-    // 🎬 OUTPUT FILES
     const outputs = ["output1.mp4", "output2.mp4", "output3.mp4"];
 
-    // 🎬 COMMANDS
     const commands = [
 
-      // 🔥 VIDEO 1 (REEL STYLE - MULTI SCENE)
-      `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,drawbox=color=black@0.4:t=fill,
-      drawtext=text='🔥 STOP SCROLLING':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=150:enable='lt(t,1.5)',
-      drawtext=text='💡 Best Quality Product':fontcolor=white:fontsize=42:x=(w-text_w)/2:y=(h/2):enable='between(t,1.5,3)',
-      drawtext=text='🎁 Limited Offer 👉 Order Now':fontcolor=yellow:fontsize=44:x=(w-text_w)/2:y=h-200:enable='gte(t,3)'
-      " -t 5 ${outputs[0]}`,
+      // 🔥 VIDEO 1 (PRO STYLE)
+      `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,
+zoompan=z='min(zoom+0.001,1.2)':d=125:s=720x1280,
+drawbox=y=0:h=250:color=black@0.6:t=fill,
+drawbox=y=1030:h=250:color=black@0.6:t=fill,
+drawtext=text='🔥 STOP SCROLLING':fontcolor=white:fontsize=52:x=(w-text_w)/2:y=80,
+drawtext=text='Premium Quality Product':fontcolor=white:fontsize=42:x=(w-text_w)/2:y=(h/2),
+drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=46:x=(w-text_w)/2:y=h-120
+" -t 5 ${outputs[0]}`,
 
       // ✅ VIDEO 2 (STABLE)
       `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,
-      drawtext=text='🔥 Limited Offer':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100,
-      drawtext=text='💡 Premium Quality':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=500,
-      drawtext=text='👉 Buy Now':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1100
-      " -t 5 ${outputs[1]}`,
+drawtext=text='🔥 Limited Offer':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100,
+drawtext=text='💡 Premium Quality':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=500,
+drawtext=text='👉 Buy Now':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1100
+" -t 5 ${outputs[1]}`,
 
       // ✅ VIDEO 3 (STABLE)
       `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,
-      drawtext=text='🔥 Trending Now':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100,
-      drawtext=text='💡 Loved by Users':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=500,
-      drawtext=text='🎁 Order Today':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1100
-      " -t 5 ${outputs[2]}`
+drawtext=text='🔥 Trending Now':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100,
+drawtext=text='💡 Loved by Users':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=500,
+drawtext=text='🎁 Order Today':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1100
+" -t 5 ${outputs[2]}`
     ];
 
-    // ▶️ RUN COMMANDS
     for (let cmd of commands) {
       await new Promise((resolve, reject) => {
         exec(cmd, (err) => {
@@ -78,7 +77,6 @@ app.post("/generate-ads", async (req, res) => {
       });
     }
 
-    // 📤 RETURN LINKS
     res.json({
       videos: outputs.map(
         (file) => `https://${req.get("host")}/${file}`
