@@ -1,4 +1,4 @@
-// STEP 6 - MULTI SCENE AD VIDEO
+// STEP 6 FIXED - MULTI SCENE STABLE VERSION
 
 import express from "express";
 import cors from "cors";
@@ -36,34 +36,31 @@ app.post("/generate-ads", async (req, res) => {
     const imgBuffer = await imgRes.arrayBuffer();
     fs.writeFileSync("input.jpg", Buffer.from(imgBuffer));
 
-    // 🎬 SCENE 1 - HOOK
+    // 🎬 SCENE 1
     await new Promise((resolve, reject) => {
       exec(
-        `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,zoompan=z='zoom+0.002',d=50,
-drawtext=text='🔥 ${safeTitle}':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=200" -t 2 scene1.mp4`,
+        `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,drawtext=text='🔥 ${safeTitle}':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=300" -t 2 scene1.mp4`,
         (err) => (err ? reject(err) : resolve())
       );
     });
 
-    // 🎬 SCENE 2 - INFO
+    // 🎬 SCENE 2
     await new Promise((resolve, reject) => {
       exec(
-        `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,
-drawtext=text='${safeDesc}':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=600" -t 2 scene2.mp4`,
+        `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,drawtext=text='${safeDesc}':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=600" -t 2 scene2.mp4`,
         (err) => (err ? reject(err) : resolve())
       );
     });
 
-    // 🎬 SCENE 3 - CTA
+    // 🎬 SCENE 3
     await new Promise((resolve, reject) => {
       exec(
-        `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,
-drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1000" -t 2 scene3.mp4`,
+        `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1000" -t 2 scene3.mp4`,
         (err) => (err ? reject(err) : resolve())
       );
     });
 
-    // 🎬 JOIN SCENES
+    // 🎬 JOIN
     fs.writeFileSync(
       "list.txt",
       "file 'scene1.mp4'\nfile 'scene2.mp4'\nfile 'scene3.mp4'"
