@@ -1,4 +1,4 @@
-// VERSION STABLE - NO VOICE (ERROR FREE)
+// UPDATED VERSION - DYNAMIC TEXT (STEP 1)
 
 import express from "express";
 import cors from "cors";
@@ -19,41 +19,46 @@ app.get("/", (req, res) => {
 
 app.post("/generate-ads", async (req, res) => {
   try {
-    const { image } = req.body;
+    // ✅ NOW GET ALL DATA
+    const { image, title, description } = req.body;
 
     let imageUrl = image;
     if (!imageUrl) {
-      imageUrl = "https://images.unsplash.com/photo-1542291026-7eec264c27ff";
+      imageUrl =
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff";
     }
+
+    // 🧠 SIMPLE TEXT CLEANING
+    const safeTitle = (title || "Amazing Product").substring(0, 30);
+    const safeDesc = (description || "Best quality product")
+      .split(" ")
+      .slice(0, 6)
+      .join(" ");
 
     // DOWNLOAD IMAGE
     const imgRes = await fetch(imageUrl);
     const imgBuffer = await imgRes.arrayBuffer();
     fs.writeFileSync("input.jpg", Buffer.from(imgBuffer));
 
-    const outputs = ["output1.mp4", "output2.mp4", "output3.mp4"];
+    const outputs = ["output1.mp4", "output2.mp4"];
 
     const commands = [
 
+      // 🎬 VIDEO 1 (HOOK STYLE)
       `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,
-drawbox=y=0:h=250:color=black@0.6:t=fill,
-drawbox=y=1030:h=250:color=black@0.6:t=fill,
-drawtext=text='🔥 STOP SCROLLING':fontcolor=white:fontsize=52:x=(w-text_w)/2:y=80,
-drawtext=text='Premium Quality Product':fontcolor=white:fontsize=42:x=(w-text_w)/2:y=(h/2),
-drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=46:x=(w-text_w)/2:y=h-120
-" -t 5 -pix_fmt yuv420p ${outputs[0]}`,
+drawbox=y=0:h=200:color=black@0.6:t=fill,
+drawbox=y=1080:h=200:color=black@0.6:t=fill,
+drawtext=text='🔥 ${safeTitle}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=80,
+drawtext=text='${safeDesc}':fontcolor=white:fontsize=34:x=(w-text_w)/2:y=500,
+drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=44:x=(w-text_w)/2:y=1100
+" -t 6 -pix_fmt yuv420p ${outputs[0]}`,
 
+      // 🎬 VIDEO 2 (CLEAN STYLE)
       `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,
-drawtext=text='🔥 Limited Offer':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100,
-drawtext=text='💡 Premium Quality':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=500,
-drawtext=text='👉 Buy Now':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1100
-" -t 5 -pix_fmt yuv420p ${outputs[1]}`,
-
-      `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,
-drawtext=text='🔥 Trending Now':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=100,
-drawtext=text='💡 Loved by Users':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=500,
-drawtext=text='🎁 Order Today':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1100
-" -t 5 -pix_fmt yuv420p ${outputs[2]}`
+drawtext=text='${safeTitle}':fontcolor=white:fontsize=46:x=(w-text_w)/2:y=200,
+drawtext=text='${safeDesc}':fontcolor=white:fontsize=32:x=(w-text_w)/2:y=600,
+drawtext=text='Limited Offer':fontcolor=yellow:fontsize=40:x=(w-text_w)/2:y=1000
+" -t 6 -pix_fmt yuv420p ${outputs[1]}`
     ];
 
     for (let cmd of commands) {
