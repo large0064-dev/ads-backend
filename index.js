@@ -1,4 +1,4 @@
-// STEP 4 - ADD BACKGROUND MUSIC
+// STEP 5 - AUDIO IMPROVEMENT + PRO FEEL
 
 import express from "express";
 import cors from "cors";
@@ -40,8 +40,11 @@ app.post("/generate-ads", async (req, res) => {
 
     const commands = [
 
-      // 🎬 VIDEO 1 + MUSIC
-      `ffmpeg -y -loop 1 -i input.jpg -i music.mp3 -vf "scale=8000:-1,zoompan=z='min(zoom+0.0015,1.5)':d=125:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)',scale=720:1280,format=yuv420p,
+      // 🎬 VIDEO 1 (IMPACT + AUDIO BOOST)
+      `ffmpeg -y -loop 1 -i input.jpg -i music.mp3 -filter_complex "
+[1:a]volume=0.3[audio];
+
+[0:v]scale=8000:-1,zoompan=z='min(zoom+0.0015,1.5)':d=125:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)',scale=720:1280,format=yuv420p,
 drawbox=y=0:h=180:color=black@0.6:t=fill,
 drawbox=y=1100:h=180:color=black@0.6:t=fill,
 
@@ -51,10 +54,14 @@ drawtext=text='${safeDesc}':enable='between(t,2,4)':fontcolor=white:fontsize=34:
 
 drawtext=text='👉 Order Now':enable='between(t,4,6)':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=1120
 
-" -t 6 -shortest -pix_fmt yuv420p ${outputs[0]}`,
+[v]
+" -map "[v]" -map "[audio]" -t 6 -shortest -pix_fmt yuv420p ${outputs[0]}`,
 
-      // 🎬 VIDEO 2 + MUSIC
-      `ffmpeg -y -loop 1 -i input.jpg -i music.mp3 -vf "scale=720:1280,format=yuv420p,
+      // 🎬 VIDEO 2 (SMOOTH + BALANCED AUDIO)
+      `ffmpeg -y -loop 1 -i input.jpg -i music.mp3 -filter_complex "
+[1:a]volume=0.25[audio];
+
+[0:v]scale=720:1280,format=yuv420p,
 fade=t=in:st=0:d=1,
 fade=t=out:st=5:d=1,
 
@@ -64,7 +71,8 @@ drawtext=text='${safeDesc}':enable='between(t,3,5)':fontcolor=white:fontsize=32:
 
 drawtext=text='Limited Offer':enable='between(t,4,6)':fontcolor=yellow:fontsize=40:x=(w-text_w)/2:y=1050
 
-" -t 6 -shortest -pix_fmt yuv420p ${outputs[1]}`
+[v]
+" -map "[v]" -map "[audio]" -t 6 -shortest -pix_fmt yuv420p ${outputs[1]}`
     ];
 
     for (let cmd of commands) {
