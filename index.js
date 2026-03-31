@@ -1,4 +1,4 @@
-// STEP 2 - ADD ZOOM EFFECT + BETTER STYLE
+// STEP 3 - TEXT TIMING + PRO AD FLOW
 
 import express from "express";
 import cors from "cors";
@@ -21,7 +21,9 @@ app.post("/generate-ads", async (req, res) => {
   try {
     const { image, title, description } = req.body;
 
-    let imageUrl = image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff";
+    let imageUrl =
+      image ||
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff";
 
     const safeTitle = (title || "Amazing Product").substring(0, 30);
     const safeDesc = (description || "Best quality product")
@@ -38,23 +40,31 @@ app.post("/generate-ads", async (req, res) => {
 
     const commands = [
 
-      // 🎬 VIDEO 1 (ZOOM EFFECT + HOOK)
+      // 🎬 VIDEO 1 (HOOK → INFO → CTA)
       `ffmpeg -y -loop 1 -i input.jpg -vf "scale=8000:-1,zoompan=z='min(zoom+0.0015,1.5)':d=125:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)',scale=720:1280,format=yuv420p,
 drawbox=y=0:h=180:color=black@0.6:t=fill,
 drawbox=y=1100:h=180:color=black@0.6:t=fill,
-drawtext=text='🔥 ${safeTitle}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=60,
-drawtext=text='${safeDesc}':fontcolor=white:fontsize=34:x=(w-text_w)/2:y=520,
-drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=1120
-" -t 5 -pix_fmt yuv420p ${outputs[0]}`,
 
-      // 🎬 VIDEO 2 (SMOOTH CLEAN STYLE)
+drawtext=text='🔥 ${safeTitle}':enable='between(t,0,2)':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=60,
+
+drawtext=text='${safeDesc}':enable='between(t,2,4)':fontcolor=white:fontsize=34:x=(w-text_w)/2:y=520,
+
+drawtext=text='👉 Order Now':enable='between(t,4,6)':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=1120
+
+" -t 6 -pix_fmt yuv420p ${outputs[0]}`,
+
+      // 🎬 VIDEO 2 (SMOOTH STORY STYLE)
       `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,format=yuv420p,
 fade=t=in:st=0:d=1,
-fade=t=out:st=4:d=1,
-drawtext=text='${safeTitle}':fontcolor=white:fontsize=46:x=(w-text_w)/2:y=300,
-drawtext=text='${safeDesc}':fontcolor=white:fontsize=32:x=(w-text_w)/2:y=650,
-drawtext=text='Limited Offer':fontcolor=yellow:fontsize=40:x=(w-text_w)/2:y=1050
-" -t 5 -pix_fmt yuv420p ${outputs[1]}`
+fade=t=out:st=5:d=1,
+
+drawtext=text='${safeTitle}':enable='between(t,1,3)':fontcolor=white:fontsize=46:x=(w-text_w)/2:y=300,
+
+drawtext=text='${safeDesc}':enable='between(t,3,5)':fontcolor=white:fontsize=32:x=(w-text_w)/2:y=650,
+
+drawtext=text='Limited Offer':enable='between(t,4,6)':fontcolor=yellow:fontsize=40:x=(w-text_w)/2:y=1050
+
+" -t 6 -pix_fmt yuv420p ${outputs[1]}`
     ];
 
     for (let cmd of commands) {
