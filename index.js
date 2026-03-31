@@ -1,4 +1,4 @@
-// STEP 5 - AUDIO IMPROVEMENT + PRO FEEL
+// STEP 6 - MULTI SCENE AD VIDEO
 
 import express from "express";
 import cors from "cors";
@@ -36,62 +36,48 @@ app.post("/generate-ads", async (req, res) => {
     const imgBuffer = await imgRes.arrayBuffer();
     fs.writeFileSync("input.jpg", Buffer.from(imgBuffer));
 
-    const outputs = ["output1.mp4", "output2.mp4"];
+    // 🎬 SCENE 1 - HOOK
+    await new Promise((resolve, reject) => {
+      exec(
+        `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,zoompan=z='zoom+0.002',d=50,
+drawtext=text='🔥 ${safeTitle}':fontcolor=white:fontsize=50:x=(w-text_w)/2:y=200" -t 2 scene1.mp4`,
+        (err) => (err ? reject(err) : resolve())
+      );
+    });
 
-    const commands = [
+    // 🎬 SCENE 2 - INFO
+    await new Promise((resolve, reject) => {
+      exec(
+        `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,
+drawtext=text='${safeDesc}':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=600" -t 2 scene2.mp4`,
+        (err) => (err ? reject(err) : resolve())
+      );
+    });
 
-      // 🎬 VIDEO 1 (IMPACT + AUDIO BOOST)
-      `ffmpeg -y -loop 1 -i input.jpg -i music.mp3 -filter_complex "
-[1:a]volume=0.3[audio];
+    // 🎬 SCENE 3 - CTA
+    await new Promise((resolve, reject) => {
+      exec(
+        `ffmpeg -y -loop 1 -i input.jpg -vf "scale=720:1280,
+drawtext=text='👉 Order Now':fontcolor=yellow:fontsize=45:x=(w-text_w)/2:y=1000" -t 2 scene3.mp4`,
+        (err) => (err ? reject(err) : resolve())
+      );
+    });
 
-[0:v]scale=8000:-1,zoompan=z='min(zoom+0.0015,1.5)':d=125:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)',scale=720:1280,format=yuv420p,
-drawbox=y=0:h=180:color=black@0.6:t=fill,
-drawbox=y=1100:h=180:color=black@0.6:t=fill,
+    // 🎬 JOIN SCENES
+    fs.writeFileSync(
+      "list.txt",
+      "file 'scene1.mp4'\nfile 'scene2.mp4'\nfile 'scene3.mp4'"
+    );
 
-drawtext=text='🔥 ${safeTitle}':enable='between(t,0,2)':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=60,
-
-drawtext=text='${safeDesc}':enable='between(t,2,4)':fontcolor=white:fontsize=34:x=(w-text_w)/2:y=520,
-
-drawtext=text='👉 Order Now':enable='between(t,4,6)':fontcolor=yellow:fontsize=42:x=(w-text_w)/2:y=1120
-
-[v]
-" -map "[v]" -map "[audio]" -t 6 -shortest -pix_fmt yuv420p ${outputs[0]}`,
-
-      // 🎬 VIDEO 2 (SMOOTH + BALANCED AUDIO)
-      `ffmpeg -y -loop 1 -i input.jpg -i music.mp3 -filter_complex "
-[1:a]volume=0.25[audio];
-
-[0:v]scale=720:1280,format=yuv420p,
-fade=t=in:st=0:d=1,
-fade=t=out:st=5:d=1,
-
-drawtext=text='${safeTitle}':enable='between(t,1,3)':fontcolor=white:fontsize=46:x=(w-text_w)/2:y=300,
-
-drawtext=text='${safeDesc}':enable='between(t,3,5)':fontcolor=white:fontsize=32:x=(w-text_w)/2:y=650,
-
-drawtext=text='Limited Offer':enable='between(t,4,6)':fontcolor=yellow:fontsize=40:x=(w-text_w)/2:y=1050
-
-[v]
-" -map "[v]" -map "[audio]" -t 6 -shortest -pix_fmt yuv420p ${outputs[1]}`
-    ];
-
-    for (let cmd of commands) {
-      await new Promise((resolve, reject) => {
-        exec(cmd, (err) => {
-          if (err) {
-            console.log("FFMPEG ERROR:", err);
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      });
-    }
+    await new Promise((resolve, reject) => {
+      exec(
+        `ffmpeg -y -f concat -safe 0 -i list.txt -c copy output1.mp4`,
+        (err) => (err ? reject(err) : resolve())
+      );
+    });
 
     res.json({
-      videos: outputs.map(
-        (file) => `https://${req.get("host")}/${file}`
-      ),
+      videos: [`https://${req.get("host")}/output1.mp4`],
     });
 
   } catch (err) {
